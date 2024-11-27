@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class ChatbotTest {
-    ChatbotConfig config = new ChatbotConfig("https://example.com/chatbot", ".ready_selector", ".input_selector", ".submit_selector", ".output_selector");
+    ChatbotConfig config = new ChatbotConfig("https://example.com/chatbot", ".ready_selector", ".input_selector", ".submit_selector", ".output_selector", 5);
     RemoteWebDriver browser = mock(RemoteWebDriver.class, RETURNS_DEEP_STUBS);
 
 

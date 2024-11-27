@@ -1,5 +1,6 @@
 package ai.mindgard.chatbot;
 
+import ai.mindgard.chatbot.ChatbotConfig.ConfigException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.cli.*;
@@ -22,8 +23,8 @@ public class Server {
     private final ArrayBlockingQueue<Chatbot> botQueue;
     private BiFunction<ChatbotConfig, Integer, Chatbot> chatbotFactory;
 
-    public Server(ChatbotConfig config, int parallelism) throws InterruptedException {
-        this(config, parallelism, Chatbot::new);
+    public Server(ChatbotConfig config) throws InterruptedException {
+        this(config, config.parallelism(), Chatbot::new);
     }
     public Server(ChatbotConfig config, int parallelism, BiFunction<ChatbotConfig,Integer,Chatbot> chatbotFactory) throws InterruptedException {
         this.botQueue = new ArrayBlockingQueue<Chatbot>(parallelism);
@@ -53,7 +54,12 @@ public class Server {
 
 
     public static void main(String... args) throws InterruptedException {
-        new Server(ChatbotConfig.readFrom(args), 5).start();
+        try {
+            new Server(ChatbotConfig.readFrom(args)).start();
+        } catch (ConfigException pe) {
+            pe.printHelp();
+            System.exit(1);
+        }
     }
 
 

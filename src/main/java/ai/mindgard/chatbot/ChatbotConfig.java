@@ -7,10 +7,11 @@ public record ChatbotConfig(
         String readySelector,
         String inputSelector,
         String submitSelector,
-        String outputSelector) {
+        String outputSelector,
+        int parallelism) {
 
 
-    public static ChatbotConfig readFrom(String[] args) {
+    public static ChatbotConfig readFrom(String[] args) throws ConfigException {
         Option urlOption = Option.builder("u")
                 .required(true)
                 .hasArg()
@@ -41,6 +42,13 @@ public record ChatbotConfig(
                 .longOpt("submit-selector")
                 .desc("CSS selector for the submit button")
                 .build();
+        Option parallelismOption = Option.builder("p")
+                .required(false)
+                .hasArg()
+                .type(Integer.class)
+                .longOpt("parallelism")
+                .desc("How many browser/chatbot instances to use for tests")
+                .build();
         Options options = new Options();
         CommandLineParser parser = new DefaultParser();
 
@@ -49,6 +57,7 @@ public record ChatbotConfig(
         options.addOption(inputOption);
         options.addOption(outputOption);
         options.addOption(submitOption);
+        options.addOption(parallelismOption);
 
         try {
             CommandLine commandLine = parser.parse(options, args);
@@ -58,12 +67,24 @@ public record ChatbotConfig(
                     commandLine.getOptionValue(readinessOption),
                     commandLine.getOptionValue(inputOption),
                     commandLine.getOptionValue(submitOption),
-                    commandLine.getOptionValue(outputOption)
+                    commandLine.getOptionValue(outputOption),
+                    commandLine.getParsedOptionValue(parallelismOption, 5)
             );
 
         } catch (ParseException e) {
-            new HelpFormatter().printHelp("chatbot", options);
-            throw new RuntimeException(e);
+            throw new ConfigException(() -> new HelpFormatter().printHelp("chatbot", options));
         }
+    }
+
+    static class ConfigException extends Exception {
+        private final Runnable printHelp;
+
+        public ConfigException(Runnable printHelp) {
+            this.printHelp = printHelp;
+        }
+        public void printHelp() {
+            printHelp.run();
+        }
+
     }
 }

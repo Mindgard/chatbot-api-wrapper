@@ -2,7 +2,7 @@
 
 Exposes a JSON API for a web chatbot for testing with the Mindgard CLI.
 
-Accepts HTTP POST of type `application/json` in the form `{"system_prompt": "{system_prompt}", "prompt":"{prompt}"}` where `{system_prompt}` and `{prompt}` are placeholders for the system prompt and prompt to use for testing.
+Accepts HTTP POST of type `application/json` to `/chatbot` in the form `{"system_prompt": "{system_prompt}", "prompt":"{prompt}"}` where `{system_prompt}` and `{prompt}` are placeholders for the system prompt and prompt to use for testing.
 
 Responds with a JSON array with one element containing the chatbot's response. e.g. `["Hello I am an LLM, how can I help you?"]`
 
@@ -25,12 +25,20 @@ java -jar target/chatbot-api-wrapper-jar-with-dependencies.jar \
  --ready-selector "button.w-full" \
  --input-selector "textarea" \
  --submit-selector "button[type=submit][class~=btn]" \
- --output-selector "div.prose"
+ --output-selector "div.prose" 
  ```
+
+Then interact with 
+```
+$ curl -vv -XPOST http://localhost:9001/chatbot -d '{"system_prompt":"Please help", "prompt": "Hello LLM, are you there?"}'
+["Hello, how can I help?"]
+```
  
-Then point the mindgard CLI at `localhost:9001` . An example compatible mindgard.toml is provided: `mindgard test --config mindgard.toml`
+Then point the mindgard CLI at `localhost:9001/chatbot` . An example compatible mindgard.toml is provided: `mindgard test --config mindgard.toml`
 
 ## Options
+
+`--parallelism` The number of browser/chatbot instances to use at once. Default 5.
 
 `--url` This is the URL to load in the browser to open the chatbot
 

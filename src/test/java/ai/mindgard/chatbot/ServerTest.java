@@ -12,15 +12,17 @@ import static org.mockito.Mockito.when;
 public class ServerTest {
     @Test
     public void should_round_robin_requests_to_chatbot_instances() throws InterruptedException, JsonProcessingException {
-        var config = new ChatbotConfig(
-            "https://example.com/bot",
-            ".ready-selector",
-            ".input-selector",
-            ".submit-selector",
-            ".output-selector"
-        );
+
         var chatbots = List.of(mock(Chatbot.class), mock(Chatbot.class));
         int parallelism = chatbots.size();
+        var config = new ChatbotConfig(
+                "https://example.com/bot",
+                ".ready-selector",
+                ".input-selector",
+                ".submit-selector",
+                ".output-selector",
+                parallelism
+        );
         var botsIterator = chatbots.iterator();
 
         var server = new Server(config, parallelism, (c, id) -> botsIterator.next());
