@@ -56,5 +56,36 @@ public class ChatbotTest {
         assertEquals("Indeed I am", result);
     }
 
+    @Test
+    public void waits_for_complete_response() {
+        var readySelector = browser.findElement(By.cssSelector(config.readySelector()));
+        var inputSelector = browser.findElement(By.cssSelector(config.inputSelector()));
+        var submitSelector = browser.findElement(By.cssSelector(config.submitSelector()));
+        var outputSelector = browser.findElement(By.cssSelector(config.outputSelector()));
+
+        when(readySelector.isDisplayed()).thenReturn(true);
+
+        var chatbot = new Chatbot(config, 5, browser, () -> {});
+
+        when(outputSelector.isDisplayed()).thenReturn(true);
+        when(inputSelector.isDisplayed()).thenReturn(true);
+        when(submitSelector.isDisplayed()).thenReturn(true);
+
+        var reply1 = mock(WebElement.class);
+        var reply2 = mock(WebElement.class);
+        when(browser.findElements(By.cssSelector(config.outputSelector()))).thenReturn(List.of(reply1, reply2));
+
+        String query = "Hello LLM, are you there?";
+        when(reply2.getText()).thenReturn("Indeed").thenReturn("Indeed I").thenReturn("Indeed I am");
+
+        var result = chatbot.send(query);
+
+        InOrder order = Mockito.inOrder(browser, inputSelector,submitSelector);
+        order.verify(browser).executeScript(eq(JS_ADD_TEXT_TO_INPUT), eq(inputSelector), eq(query));
+        order.verify(inputSelector).sendKeys(eq(" "));
+        order.verify(submitSelector).click();
+
+        assertEquals("Indeed I am", result);
+    }
 
 }
